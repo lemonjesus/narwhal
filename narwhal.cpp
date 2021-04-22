@@ -53,10 +53,23 @@ void narwhal_start(SDL_Window* window, ImGuiIO* pio) {
         }
 
         if (ui.new_window_open) {
-            ImGui::Begin("New Project", &ui.new_window_open, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+            ImGui::Begin("New Project", &ui.new_window_open, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
             ImGui::Text("Select an architecture and mode to begin:");
             ImGui::Combo("Archetecture", &ui.arch_selection, architecture_strings);
-            ImGui::Combo("Mode", &ui.mode_selection, mode_strings(ui.arch_selection));
+            ImGui::Combo("Mode", &ui.mode_selection, mode_strings());
+
+            ImGui::Text("Endianess: "); ImGui::SameLine();
+            ImGui::RadioButton("Little", &ui.endianess, 0); ImGui::SameLine();
+            ImGui::RadioButton("Big", &ui.endianess, 1);
+
+            ImGui::Dummy(ImVec2(ImGui::GetWindowContentRegionWidth() - 60, 0)); ImGui::SameLine();
+            
+            if(ImGui::Button("Create", ImVec2(50, 0))) {
+                create_project();
+                ui.new_window_open = false;
+                ui.cpu_window_open = true;
+                ui.memory_window_open = true;
+            }
 
             ImGui::End();
         }
@@ -94,8 +107,28 @@ void build_main_menu() {
     }
 }
 
-const char* mode_strings(int ui_arch_selection) {
-    switch(ui_arch_selection) {
+void create_project() {
+    switch(ui.arch_selection) {
+    case 0:
+        ctx.arch = UC_ARCH_ARM;
+        break;
+    case 1:
+        ctx.arch = UC_ARCH_ARM64;
+        break;
+    case 2:
+        ctx.arch = UC_ARCH_MIPS;
+        break;
+    case 3:
+        ctx.arch = UC_ARCH_X86;
+        break;
+    case 4:
+        ctx.arch = UC_ARCH_SPARC;
+        break;
+    }
+}
+
+const char* mode_strings() {
+    switch(ui.arch_selection) {
     case 0: return arm_mode_strings;
     case 1: return arm64_mode_strings;
     case 2: return mips_mode_strings;

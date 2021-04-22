@@ -14,6 +14,7 @@ typedef struct {
     bool new_window_open;
     int arch_selection;
     int mode_selection;
+    int endianess;
 
     bool open_window_open;
     bool save_window_open;

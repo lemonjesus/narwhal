@@ -40,5 +40,6 @@ void narwhal_start(SDL_Window* window, ImGuiIO* io);
 
 // not used anywhere else
 void build_main_menu();
-const char* mode_strings(int ui_arch_selection);
+void create_project();
+const char* mode_strings();
 #endif
