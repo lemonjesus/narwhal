@@ -4,17 +4,18 @@
 #include "narwhal.h"
 #include "narwhal_context.h"
 
+#include "arch/narwhal_arm.h"
+
 #include <unicorn/unicorn.h>
 
-static NarwhalContext ctx;
-static NarwhalUIContext ui;
+NarwhalContext ctx;
+NarwhalUIContext ui;
 
 void narwhal_start(SDL_Window* window, ImGuiIO* pio) {
     ImGuiIO io = *pio;
 
     // Our state
     bool show_demo_window = true;
-    bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Main loop
@@ -72,6 +73,14 @@ void narwhal_start(SDL_Window* window, ImGuiIO* pio) {
             }
 
             ImGui::End();
+        }
+
+        if (ui.cpu_window_open) {
+            switch (ctx.arch) {
+            case UC_ARCH_ARM:
+                show_arm_cpu_window();
+                break;
+            }
         }
 
         // Rendering

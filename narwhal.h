@@ -4,7 +4,6 @@
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_sdl.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
-#include "narwhal.h"
 #include <stdio.h>
 #include <SDL.h>
 
@@ -42,4 +41,12 @@ void narwhal_start(SDL_Window* window, ImGuiIO* io);
 void build_main_menu();
 void create_project();
 const char* mode_strings();
+
+const char* architecture_strings = "ARM\0ARM64\0Mips\0x86\0Sparc\0M68K\0\0";
+const char* arm_mode_strings = "ARM Mode\0THUMB Mode\0ARM926\0ARM946\0ARM1176\0\0";
+const char* arm64_mode_strings = "ARM Mode\0THUMB Mode\0\0";
+const char* mips_mode_strings = "Mips32 ISA\0Mips64 ISA\0\0";
+const char* x86_mode_strings = "16-bit mode\00032-bit mode\00064-bit mode\0\0";
+const char* sparc_mode_strings = "32-bit mode\00064-bit mode\0\0";
+const char* blank_mode_strings = "No Modes For Selected Archetecture\0\0";
 #endif
