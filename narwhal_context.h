@@ -7,6 +7,8 @@ typedef struct {
     uint16_t version;
     uc_arch arch;
     uc_mode mode;
+    uc_engine *uc;
+    uc_err ucerr;
 } NarwhalContext;
 
 typedef struct {
