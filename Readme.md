@@ -17,7 +17,7 @@ Narwhal is under infrequent development. I had the idea, I started writing it, b
 ## Building
 To build Narwhal, you need a C++ compiler, `make`, Unicorn, and SDL and OpenGL (these can be substituted for any backend ImGUI supports). Simply running `make` will build the binary (on linux, at least).
 
-### To Do (in order of my personal priority)
+## To Do (in order of my personal priority)
  - Finish basic graphical ARM execution
  - Graphical memory mapping
  - Loading binaries from file
@@ -27,7 +27,7 @@ To build Narwhal, you need a C++ compiler, `make`, Unicorn, and SDL and OpenGL (
  - Begin implementing "CPU Windows" for architectures other than ARM
 
 ## Feature Requests?
-I am ignorant to what real, non-hobbiest reverse engineers need their tools to do. I'm writing this for the things I need it to do, but that might just be a small sliver of what real professionals need their software to do. As such, you can ask me to add stuff, but in general I'd much rather merge in pull requests. It's less work. 😁
+I am ignorant to what real, non-hobbyist reverse engineers need their tools to do. I'm writing this for the things I need it to do, but that might just be a small sliver of what real professionals need their software to do. As such, you can ask me to add stuff, but in general I'd much rather merge in pull requests. It's less work. 😁
 
 ## License
 GNU General Public License v3.0

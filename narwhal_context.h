@@ -3,15 +3,15 @@
 
 #include <unicorn/unicorn.h>
 
-typedef struct {
+struct NarwhalContext {
     uint16_t version;
     uc_arch arch;
     uc_mode mode;
     uc_engine *uc;
     uc_err ucerr;
-} NarwhalContext;
+};
 
-typedef struct {
+struct NarwhalUIContext {
     bool new_window_open;
     int arch_selection;
     int mode_selection;
@@ -23,9 +23,9 @@ typedef struct {
     bool memory_window_open;
     bool debug_window_open;
     bool demo_window_open;
-} NarwhalUIContext;
+};
 
-extern NarwhalContext ctx;
-extern NarwhalUIContext ui;
+extern struct NarwhalContext ctx;
+extern struct NarwhalUIContext ui;
 
 #endif
