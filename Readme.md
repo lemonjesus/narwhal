@@ -1,4 +1,4 @@
-# Narwhal
+# Narwhal (WIP)
 Narwhal is basically a frontend for the Unicorn Framework. The idea is to have a visual way to build up embedded systems in software to aid in reverse engineering.
 
 ## The End Goal
