@@ -1,5 +1,5 @@
-#ifndef NARWHAL_CONTEXT
-#define NARWHAL_CONTEXT
+#ifndef _NARWHAL_CONTEXT
+#define _NARWHAL_CONTEXT
 
 #include <unicorn/unicorn.h>
 

@@ -1,12 +1,16 @@
 // NARWHAL MAIN CODE
 // Called from main.cpp after the SDL and GL stuff are set up
 
+#include <unicorn/unicorn.h>
+
 #include "narwhal.h"
 #include "narwhal_context.h"
-
 #include "arch/narwhal_arm.h"
 
-#include <unicorn/unicorn.h>
+
+void build_main_menu();
+void create_project();
+const char* mode_strings();
 
 NarwhalContext ctx;
 NarwhalUIContext ui;
@@ -14,22 +18,22 @@ NarwhalUIContext ui;
 void narwhal_start(SDL_Window* window, ImGuiIO* pio) {
     ImGuiIO io = *pio;
 
+    ctx.uc = NULL;
+
     // Our state
     bool show_demo_window = true;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Main loop
     bool done = false;
-    while (!done)
-    {
+    while (!done) {
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
         // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         SDL_Event event;
-        while (SDL_PollEvent(&event))
-        {
+        while (SDL_PollEvent(&event)) {
             ImGui_ImplSDL2_ProcessEvent(&event);
             if (event.type == SDL_QUIT)
                 done = true;

@@ -1,5 +1,5 @@
-#ifndef NARWHAL_ARCH_ARM
-#define NARWHAL_ARCH_ARM
+#ifndef _NARWHAL_ARCH_ARM
+#define _NARWHAL_ARCH_ARM
 
 #include <unicorn/unicorn.h>
 
