@@ -247,5 +247,5 @@ const char* const arm_reg_names[] = { //"APSR",
                                 // "ENDING",
 };
 
-void show_arm_cpu_window();
+void show_arm_windows();
 #endif

@@ -20,6 +20,7 @@ struct NarwhalUIContext {
     bool open_window_open;
     bool save_window_open;
     bool cpu_window_open;
+    bool config_window_open;
     bool memory_window_open;
     bool debug_window_open;
     bool demo_window_open;

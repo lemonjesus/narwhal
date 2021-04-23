@@ -82,7 +82,7 @@ void narwhal_start(SDL_Window* window, ImGuiIO* pio) {
         if (ui.cpu_window_open) {
             switch (ctx.arch) {
             case UC_ARCH_ARM:
-                show_arm_cpu_window();
+                show_arm_windows();
                 break;
             }
         }
