@@ -1,4 +1,5 @@
 #include <vector>
+#include <stdio.h>
 #include <unicorn/unicorn.h>
 
 #include "narwhal_arm.h"
@@ -14,6 +15,9 @@ void show_arm_cpu_window();
 void show_arm_memory_window();
 
 void show_arm_windows() {
+    if(ctx.uc == NULL) {
+        uc_open(UC_ARCH_ARM, UC_MODE_ARM, &ctx.uc);
+    }
     show_arm_config_window();
     show_arm_cpu_window();
     show_arm_memory_window();
@@ -31,19 +35,44 @@ void show_arm_cpu_window() {
     ImGui::Begin("ARM CPU State", &ui.cpu_window_open, ImGuiWindowFlags_AlwaysAutoResize);
 
     uint32_t value = 0;
+    char edit_id[16] = "";
     if (ImGui::BeginTable("Registers", 2)) {
         for(int i = 0; i < IM_ARRAYSIZE(arm_regs); i++) {
-            if(ctx.uc != NULL) uc_reg_read(ctx.uc, arm_regs[i], &value);
+            uc_reg_read(ctx.uc, arm_regs[i], &value);
+            sprintf(edit_id, "editreg%d", i);
             ImGui::TableNextColumn();
             ImGui::Text("%s", arm_reg_names[i]);
             ImGui::TableNextColumn();
             ImGui::Text("0x%08X", value);
+            ImGui::OpenPopupOnItemClick(edit_id, ImGuiPopupFlags_MouseButtonRight);
+            if (ImGui::BeginPopupContextItem(edit_id)) {
+                static char edit_input[9] = "";
+                ImGui::Text("Edit Value for %s:", arm_reg_names[i]);
+                ImGui::InputText("", edit_input, 9, ImGuiInputTextFlags_CharsHexadecimal);
+                if (ImGui::Button("OK")) {
+                    uint64_t edit_value = 0;
+                    edit_value = strtol(edit_input, NULL, 16);
+                    uc_reg_write(ctx.uc, arm_regs[i], &edit_value);
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Cancel")) {
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::EndPopup();
+            }
         }
         ImGui::EndTable();
     }
 
     if(ImGui::Button("Step")) {
-        
+        uint64_t pc;
+        uc_reg_read(ctx.uc, UC_ARM_REG_PC, &pc);
+        printf("Starting emulation from %X to %X\n", pc, pc+4);
+        uc_err err = uc_emu_start(ctx.uc, pc, pc+8, 0, 1);
+        if (err) {
+            printf("Failed on uc_emu_start() with error returned: %u\n", err);
+        }
     }
 
     ImGui::End();
@@ -98,6 +127,10 @@ void show_arm_memory_window() {
                 new_memory_region.perms |= executable ? UC_PROT_EXEC: 0;
                 new_memory_region.ptr = calloc(1, new_memory_region.size);
                 ctx.mapped_regions.push_back(new_memory_region);
+                uc_err err = uc_mem_map_ptr(ctx.uc, new_memory_region.address, new_memory_region.size, new_memory_region.perms, new_memory_region.ptr);
+                if (err) {
+                    printf("Failed on uc_mem_map_ptr() with error returned: %u with %08X, %08X, %08X, %08X, %08X\n", err, ctx.uc, new_memory_region.address, new_memory_region.size, new_memory_region.perms, new_memory_region.ptr);
+                }
                 ImGui::CloseCurrentPopup();
             }
             ImGui::SetItemDefaultFocus();
