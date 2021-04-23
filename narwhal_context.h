@@ -1,17 +1,29 @@
 #ifndef _NARWHAL_CONTEXT
 #define _NARWHAL_CONTEXT
 
+#include <vector>
+#include <stdint.h>
 #include <unicorn/unicorn.h>
 
-struct NarwhalContext {
+struct memory_region {
+    char* name;
+    uint64_t address;
+    size_t size;
+    uint32_t perms;
+    void *ptr;
+};
+
+struct narwhal_context {
     uint16_t version;
     uc_arch arch;
     uc_mode mode;
     uc_engine *uc;
     uc_err ucerr;
+
+    std::vector<struct memory_region> mapped_regions;
 };
 
-struct NarwhalUIContext {
+struct narwhal_ui_context {
     bool new_window_open;
     int arch_selection;
     int mode_selection;
@@ -26,7 +38,7 @@ struct NarwhalUIContext {
     bool demo_window_open;
 };
 
-extern struct NarwhalContext ctx;
-extern struct NarwhalUIContext ui;
+extern struct narwhal_context ctx;
+extern struct narwhal_ui_context ui;
 
 #endif

@@ -12,8 +12,8 @@ void build_main_menu();
 void create_project();
 const char* mode_strings();
 
-NarwhalContext ctx;
-NarwhalUIContext ui;
+narwhal_context ctx;
+narwhal_ui_context ui;
 
 void narwhal_start(SDL_Window* window, ImGuiIO* pio) {
     ImGuiIO io = *pio;
