@@ -77,8 +77,8 @@ void show_arm_memory_window() {
     ImGui::Begin("Memory Regions", &ui.memory_window_open);
     
     if (ImGui::BeginTabBar("MyTabBar", ImGuiTabBarFlags_TabListPopupButton)) {
-        for(uint64_t i = 0; i < ctx.mapped_regions.size(); i++) {
-            struct memory_region region = ctx.mapped_regions.at(i); 
+        for(int i = 0; i < (int) ctx.mapped_regions.size(); i++) {
+            struct memory_region region = ctx.mapped_regions.at(i);
             if (ImGui::BeginTabItem(region.name)) {
                 ImGui::Text(region.name);
                 ImGui::Text("Address: 0x%X", region.address);
@@ -98,13 +98,18 @@ void show_arm_memory_window() {
                 }
                 ImGui::Text("");
 
+                char edit_id[16]; char clone_id[16]; char del_id[16];
+                sprintf(edit_id, "editmem%d", i);
+                sprintf(clone_id, "clonemem%d", i);
+                sprintf(del_id, "delmem%d", i);
+
                 if (ImGui::Button("Edit")) {
-                    printf("EDIT %s\n", region.name);
+                    ImGui::OpenPopup(edit_id);
                 }
                 ImGui::SameLine();
                 
                 if (ImGui::Button("Clone")) {
-                    printf("CLONE %s\n", region.name);
+                    ImGui::OpenPopup(clone_id);
                 }
                 ImGui::SameLine();
 
@@ -112,12 +117,25 @@ void show_arm_memory_window() {
                 ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor(1.0f, 0.3f, 0.3f));
                 ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor(0.8f, 0.0f, 0.0f));
                 if(ImGui::Button("Delete")) {
-                    printf("DELETE %s\n", region.name);
+                    ImGui::OpenPopup(del_id);
                 }
                 ImGui::PopStyleColor(3);
                 
                 mem_edit.DrawContents(region.ptr, region.size, region.address);
                 ImGui::EndTabItem();
+
+                if (ImGui::BeginPopupModal(edit_id, NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+                    ImGui::Text("Editing %s", region.name);
+                    ImGui::EndPopup();
+                }
+                if (ImGui::BeginPopupModal(clone_id, NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+                    ImGui::Text("Cloning %s", region.name);
+                    ImGui::EndPopup();
+                }
+                if (ImGui::BeginPopupModal(del_id, NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+                    ImGui::Text("DELETING %s", region.name);
+                    ImGui::EndPopup();
+                }
             }
         }
         
@@ -137,14 +155,26 @@ void show_arm_memory_window() {
             ImGui::InputText("Address (hex, x4KB)", addr_buf, 32, ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_CharsUppercase);
             ImGui::InputText("Size (hex, x4KB)", size_buf, 32, ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_CharsUppercase);
 
-            long addr = strtol(addr_buf, NULL, 16);
-            long size = strtol(size_buf, NULL, 16);
-            bool valid = (addr > 0) && (size > 0) && (addr % 4096 == 0) && (size % 4096 == 0);
+            bool valid = true;
+            const char* reason;
 
             static bool readable, writable, executable;
             ImGui::Checkbox("Readable", &readable); ImGui::SameLine();
             ImGui::Checkbox("Writable", &writable); ImGui::SameLine();
             ImGui::Checkbox("Executable", &executable);
+            
+            if(!(readable || writable || executable)) {
+                valid = false;
+                reason = "Must have some permission";
+            }
+
+            long addr = strtol(addr_buf, NULL, 16);
+            long size = strtol(size_buf, NULL, 16);
+            if(!((addr > 0) && (size > 0) && (addr % 4096 == 0) && (size % 4096 == 0))) {
+                valid = false;
+                reason = "Must be 4KB aligned";
+            }
+
             if (valid) {
                 if (ImGui::Button("OK", ImVec2(120, 0))) {
                     struct memory_region new_memory_region;
@@ -164,7 +194,7 @@ void show_arm_memory_window() {
                     ImGui::CloseCurrentPopup();
                 }
             } else {
-                ImGui::Text("Must be 4KB aligned");
+                ImGui::Text(reason);
             }
             ImGui::SetItemDefaultFocus();
             ImGui::SameLine();
