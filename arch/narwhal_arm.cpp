@@ -77,8 +77,7 @@ void show_arm_memory_window() {
     ImGui::Begin("Memory Regions", &ui.memory_window_open);
     
     if (ImGui::BeginTabBar("MyTabBar", ImGuiTabBarFlags_TabListPopupButton)) {
-        for(int i = 0; i < (int) ctx.mapped_regions.size(); i++) {
-            struct memory_region region = ctx.mapped_regions.at(i);
+        for(struct memory_region region : ctx.mapped_regions) {
             if (ImGui::BeginTabItem(region.name)) {
                 ImGui::Text(region.name);
                 ImGui::Text("Address: 0x%X", region.address);
@@ -98,10 +97,10 @@ void show_arm_memory_window() {
                 }
                 ImGui::Text("");
 
-                char edit_id[16]; char clone_id[16]; char del_id[16];
-                sprintf(edit_id, "editmem%d", i);
-                sprintf(clone_id, "clonemem%d", i);
-                sprintf(del_id, "delmem%d", i);
+                char edit_id[68]; char clone_id[68]; char del_id[68];
+                sprintf(edit_id, "Edit %s", region.name);
+                sprintf(clone_id, "Clone %s", region.name);
+                sprintf(del_id, "Delete %s?", region.name);
 
                 if (ImGui::Button("Edit")) {
                     ImGui::OpenPopup(edit_id);
@@ -122,20 +121,23 @@ void show_arm_memory_window() {
                 ImGui::PopStyleColor(3);
                 
                 mem_edit.DrawContents(region.ptr, region.size, region.address);
-                ImGui::EndTabItem();
-
                 if (ImGui::BeginPopupModal(edit_id, NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
                     ImGui::Text("Editing %s", region.name);
+                    if (ImGui::Button("Cancel", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
                     ImGui::EndPopup();
                 }
                 if (ImGui::BeginPopupModal(clone_id, NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
                     ImGui::Text("Cloning %s", region.name);
+                    if (ImGui::Button("Cancel", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
                     ImGui::EndPopup();
                 }
                 if (ImGui::BeginPopupModal(del_id, NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
                     ImGui::Text("DELETING %s", region.name);
+                    if (ImGui::Button("Cancel", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
                     ImGui::EndPopup();
                 }
+                ImGui::EndTabItem();
+
             }
         }
         
