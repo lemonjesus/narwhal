@@ -87,6 +87,7 @@ void show_arm_memory_window() {
             struct memory_region* region = ctx.mapped_regions.data() + i;
         // for(struct memory_region region : ctx.mapped_regions) {
             if (ImGui::BeginTabItem(region->name)) {
+                ImGui::BeginGroup();
                 ImGui::Text(region->name);
                 ImGui::Text("Address: 0x%X", region->address);
                 ImGui::SameLine();
@@ -105,9 +106,9 @@ void show_arm_memory_window() {
                 }
                 ImGui::Text("");
 
-                char edit_id[68]; char clone_id[68]; char del_id[68];
+                char edit_id[68]; char link_id[68]; char del_id[68];
                 sprintf(edit_id, "Edit %s", region->name);
-                sprintf(clone_id, "Clone %s", region->name);
+                sprintf(link_id, "Link %s", region->name);
                 sprintf(del_id, "Delete %s?", region->name);
 
                 if (ImGui::Button("Edit")) {
@@ -115,8 +116,8 @@ void show_arm_memory_window() {
                 }
                 ImGui::SameLine();
                 
-                if (ImGui::Button("Clone")) {
-                    ImGui::OpenPopup(clone_id);
+                if (ImGui::Button("Link")) {
+                    ImGui::OpenPopup(link_id);
                 }
                 ImGui::SameLine();
 
@@ -127,6 +128,27 @@ void show_arm_memory_window() {
                     ImGui::OpenPopup(del_id);
                 }
                 ImGui::PopStyleColor(3);
+                ImGui::EndGroup();
+
+                if(region->links.size() > 0) {
+                    ImGui::SameLine();
+                    ImGui::Dummy(ImVec2(40,40));
+                    ImGui::SameLine();
+                    ImGui::BeginGroup();
+                    ImGui::Text("Linked To:");
+                    for (uint64_t addr : region->links) {
+                        static char label[32];
+                        snprintf(label, 32, "%lX", addr);
+                        ImGui::Selectable(label);
+                        if (ImGui::BeginPopupContextItem()) {
+                            ImGui::Text("This a popup for \"0x%lX\"!", addr);
+                            if (ImGui::Button("Close"))
+                                ImGui::CloseCurrentPopup();
+                            ImGui::EndPopup();
+                        }
+                    }
+                    ImGui::EndGroup();
+                }
                 
                 mem_edit.DrawContents(region->ptr, region->size, region->address);
 
@@ -161,13 +183,46 @@ void show_arm_memory_window() {
 
                     ImGui::EndPopup();
                 }
-                if (ImGui::BeginPopupModal(clone_id, NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-                    ImGui::Text("Cloning %s", region->name);
+                if (ImGui::BeginPopupModal(link_id, NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+                    static char addr_buf[32];
+                    ImGui::Text("Linking a memory map allows it to be accessed from two base addresses.");
+                    ImGui::InputText("Address (hex, x4KB)", addr_buf, 32, ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_CharsUppercase);
+                    
+                    bool valid = true;
+                    const char* reason;
+                    
+                    long addr = strtol(addr_buf, NULL, 16);
+                    if(addr % 4096 != 0) {
+                        valid = false;
+                        reason = "Must be 4KB aligned";
+                    }
+
+                    if(valid) {
+                        if (ImGui::Button("Link", ImVec2(120, 0))) {
+                            region->links.push_back(addr);
+                            //TODO: map again in unicorn
+                            ImGui::CloseCurrentPopup(); 
+                        }
+                    } else {
+                        ImGui::Text(reason);
+                    }
+                    ImGui::SameLine();
                     if (ImGui::Button("Cancel", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
                     ImGui::EndPopup();
                 }
                 if (ImGui::BeginPopupModal(del_id, NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-                    ImGui::Text("DELETING %s", region->name);
+                    ImGui::Text("Are you sure you want to DELETE %s?", region->name);
+
+                    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(1.0f, 0.0f, 0.0f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor(1.0f, 0.3f, 0.3f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor(0.8f, 0.0f, 0.0f));
+                    if(ImGui::Button("Delete", ImVec2(120, 0))) {
+                        
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::PopStyleColor(3);
+
+                    ImGui::SameLine();
                     if (ImGui::Button("Cancel", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
                     ImGui::EndPopup();
                 }
@@ -257,7 +312,7 @@ bool render_memory_map_modal(struct memory_region* region) {
 
     long addr = strtol(addr_buf, NULL, 16);
     long size = strtol(size_buf, NULL, 16);
-    if(!((addr > 0) && (size > 0) && (addr % 4096 == 0) && (size % 4096 == 0))) {
+    if(!((size > 0) && (addr % 4096 == 0) && (size % 4096 == 0))) {
         valid = false;
         reason = "Must be 4KB aligned";
     }

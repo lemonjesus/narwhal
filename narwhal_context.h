@@ -8,6 +8,7 @@
 struct memory_region {
     char* name;
     uint64_t address;
+    std::vector<uint64_t> links;
     size_t size;
     uint32_t perms;
     void *ptr;
