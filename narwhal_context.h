@@ -11,6 +11,7 @@ struct memory_region {
     size_t size;
     uint32_t perms;
     void *ptr;
+    bool editing;
 };
 
 struct narwhal_context {
