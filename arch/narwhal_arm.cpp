@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <vector>
 #include <stdio.h>
 #include <unicorn/unicorn.h>
@@ -141,9 +142,20 @@ void show_arm_memory_window() {
                         snprintf(label, 32, "%lX", addr);
                         ImGui::Selectable(label);
                         if (ImGui::BeginPopupContextItem()) {
-                            ImGui::Text("This a popup for \"0x%lX\"!", addr);
-                            if (ImGui::Button("Close"))
+                            if (ImGui::Button("Separate")) {}
+                            ImGui::SameLine();
+                            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(1.0f, 0.0f, 0.0f));
+                            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor(1.0f, 0.3f, 0.3f));
+                            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor(0.8f, 0.0f, 0.0f));
+                            if (ImGui::Button("Delete")){
+                                uc_err err = uc_mem_unmap(ctx.uc, addr, region->size);
+                                if (err) {
+                                    printf("Failed on uc_mem_unmap() with error returned: %u with %p, %08lX, %08lX\n", err, ctx.uc, region->address, region->size);
+                                }
+                                region->links.erase(std::remove(region->links.begin(), region->links.end(), addr), region->links.end());
                                 ImGui::CloseCurrentPopup();
+                            }
+                            ImGui::PopStyleColor(3);
                             ImGui::EndPopup();
                         }
                     }
@@ -162,6 +174,12 @@ void show_arm_memory_window() {
                         if (err) {
                             printf("Failed on uc_mem_unmap() with error returned: %u with %p, %08lX, %08lX\n", err, ctx.uc, region->address, region->size);
                         }
+                        for(uint64_t addr : region->links) {
+                            uc_err err = uc_mem_unmap(ctx.uc, addr, region->size);
+                            if (err) {
+                                printf("Failed on uc_mem_unmap() with error returned: %u with %p, %08lX, %08lX\n", err, ctx.uc, region->address, region->size);
+                            }
+                        }
 
                         // 2. reallocate the actual memory backing with the new size and copy contents
                         region->ptr = calloc(1, edit_copy.size);
@@ -178,6 +196,12 @@ void show_arm_memory_window() {
                         err = uc_mem_map_ptr(ctx.uc, region->address, region->size, region->perms, region->ptr);
                         if (err) {
                             printf("Failed on uc_mem_map_ptr() with error returned: %u with %p, %08lX, %08lX, %08X, %p\n", err, ctx.uc, region->address, region->size, region->perms, region->ptr);
+                        }
+                        for(uint64_t addr : region->links) {
+                            uc_err err = uc_mem_map_ptr(ctx.uc, addr, region->size, region->perms, region->ptr);
+                            if (err) {
+                                printf("Failed on uc_mem_map_ptr() with error returned: %u with %p, %08lX, %08lX, %08X, %p\n", err, ctx.uc, addr, region->size, region->perms, region->ptr);
+                            }
                         }
                     }
 
@@ -200,7 +224,10 @@ void show_arm_memory_window() {
                     if(valid) {
                         if (ImGui::Button("Link", ImVec2(120, 0))) {
                             region->links.push_back(addr);
-                            //TODO: map again in unicorn
+                            uc_err err = uc_mem_map_ptr(ctx.uc, addr, region->size, region->perms, region->ptr);
+                            if (err) {
+                                printf("Failed on uc_mem_map_ptr() with error returned: %u with %p, %08lX, %08lX, %08X, %p\n", err, ctx.uc, addr, region->size, region->perms, region->ptr);
+                            }
                             ImGui::CloseCurrentPopup(); 
                         }
                     } else {
@@ -217,7 +244,6 @@ void show_arm_memory_window() {
                     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor(1.0f, 0.3f, 0.3f));
                     ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor(0.8f, 0.0f, 0.0f));
                     if(ImGui::Button("Delete", ImVec2(120, 0))) {
-                        
                         ImGui::CloseCurrentPopup();
                     }
                     ImGui::PopStyleColor(3);
