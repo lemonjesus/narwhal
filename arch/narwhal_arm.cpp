@@ -177,7 +177,7 @@ void show_arm_memory_window() {
                         for(uint64_t addr : region->links) {
                             uc_err err = uc_mem_unmap(ctx.uc, addr, region->size);
                             if (err) {
-                                printf("Failed on uc_mem_unmap() with error returned: %u with %p, %08lX, %08lX\n", err, ctx.uc, region->address, region->size);
+                                printf("Failed on linked uc_mem_unmap() with error returned: %u with %p, %08lX, %08lX\n", err, ctx.uc, addr, region->size);
                             }
                         }
 
@@ -200,7 +200,7 @@ void show_arm_memory_window() {
                         for(uint64_t addr : region->links) {
                             uc_err err = uc_mem_map_ptr(ctx.uc, addr, region->size, region->perms, region->ptr);
                             if (err) {
-                                printf("Failed on uc_mem_map_ptr() with error returned: %u with %p, %08lX, %08lX, %08X, %p\n", err, ctx.uc, addr, region->size, region->perms, region->ptr);
+                                printf("Failed on linked uc_mem_map_ptr() with error returned: %u with %p, %08lX, %08lX, %08X, %p\n", err, ctx.uc, addr, region->size, region->perms, region->ptr);
                             }
                         }
                     }
@@ -244,6 +244,21 @@ void show_arm_memory_window() {
                     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor(1.0f, 0.3f, 0.3f));
                     ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor(0.8f, 0.0f, 0.0f));
                     if(ImGui::Button("Delete", ImVec2(120, 0))) {
+                        // unmap the memory from unicorn
+                        uc_err err = uc_mem_unmap(ctx.uc, region->address, region->size);
+                        if (err) {
+                            printf("Failed on uc_mem_unmap() with error returned: %u with %p, %08lX, %08lX\n", err, ctx.uc, region->address, region->size);
+                        }
+                        for(uint64_t addr : region->links) {
+                            uc_err err = uc_mem_unmap(ctx.uc, addr, region->size);
+                            if (err) {
+                                printf("Failed on linked uc_mem_unmap() with error returned: %u with %p, %08lX, %08lX\n", err, ctx.uc, addr, region->size);
+                            }
+                        }
+
+                        // delete it from narwhal
+                        free(region->ptr);
+                        ctx.mapped_regions.erase(ctx.mapped_regions.begin() + i);
                         ImGui::CloseCurrentPopup();
                     }
                     ImGui::PopStyleColor(3);
