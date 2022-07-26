@@ -3,10 +3,19 @@
 </template>
 
 <script>
+import { useVmStore } from '../stores/vm'
+
 export default {
   name: 'ProcessorWindow',
   props: {
     msg: String
+  },
+  setup() {
+    const vm = useVmStore()
+
+    return {
+      vm
+    };
   }
 }
 </script>

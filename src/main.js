@@ -1,10 +1,14 @@
 import Vue from 'vue'
 import App from './App.vue'
 
-import vgl from 'vue-golden-layout'
-Vue.use(vgl);
+import { createPinia, PiniaVuePlugin } from 'pinia'
+Vue.use(PiniaVuePlugin)
+const pinia = createPinia()
+
 
 import 'golden-layout/src/css/goldenlayout-dark-theme.css'
+import vgl from 'vue-golden-layout'
+Vue.use(vgl);
 
 Vue.config.productionTip = false
 
@@ -20,4 +24,5 @@ Vue.use(IconsPlugin)
 
 new Vue({
   render: h => h(App),
+  pinia
 }).$mount('#app')
