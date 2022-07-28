@@ -1,5 +1,23 @@
 <template>
-    <h1>{{ msg }}</h1>
+  <div class="container pt-2">
+    <div v-for="group in this.vm.getRegisters" :key="group.name">
+      <h6 class="reg-separator">{{ group.name }}</h6>
+      <table class="table table-sm table-striped">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody class="table-hover">
+          <tr v-for="reg in group.regs" :key="reg.name">
+            <td>{{ reg.name }}</td>
+            <td v-html="reg.formatter ? reg.formatter(vm.getCPU.reg_read_i32(reg.id)) : vm.getCPU.reg_read_i32(reg.id)"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -22,18 +40,12 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h3 {
-  margin: 40px 0 0;
+.table-sm {
+  font-size: 0.8rem;
+  font-family: monospace;
 }
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
+.table-sm * {
+  border-color: #444;
+  border-top: none;
 }
 </style>

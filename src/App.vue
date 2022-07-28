@@ -35,7 +35,7 @@
     </golden-layout>
 
     <div v-if="!vm.cpu" class="text-dark">
-      <h1>No CPU</h1>
+      <h1>No Project</h1>
       Select <kbd>File > New</kbd> to get started, or <kbd>File > Open</kbd> to resume a session.
     </div>
   
@@ -96,6 +96,7 @@ html, body {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
   text-align: center;
   color: white;
   margin: 0;
