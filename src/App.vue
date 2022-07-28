@@ -96,7 +96,6 @@ html, body {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow: hidden;
   text-align: center;
   color: white;
   margin: 0;
@@ -105,10 +104,11 @@ html, body {
 
 .hscreen {
 	width: 100vw;
-	height: 100vh;
+	height: calc(100vh - 40px);
 }
 
 #toolbar .navbar {
   padding: 0rem 1rem;
+  height: 40px;
 }
 </style>

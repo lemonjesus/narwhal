@@ -1,15 +1,15 @@
 <template>
   <div>
-    <hex-editor></hex-editor>
+    <HexEditor msg="hi"></HexEditor>
   </div>
 </template>
 
 <script>
-import { HexEditor } from './HexEditor.vue'
+import HexEditor from './HexEditor.vue'
 
 export default {
   name: 'MemoryWindow',
-  components: {HexEditor},
+  components: { HexEditor },
   props: {
     msg: String
   }

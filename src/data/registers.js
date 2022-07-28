@@ -50,5 +50,5 @@ export default {
         output += "<small class='ml-2'>(" + (hex(32)(value)) + ")</small>";
         return output;
       }}
-    ]}]
+    ]}],
 }
